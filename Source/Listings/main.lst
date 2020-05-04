@@ -1,0 +1,124 @@
+A51 MACRO ASSEMBLER  MAIN                                                                 05/05/2020 00:18:36 PAGE     1
+
+
+MACRO ASSEMBLER A51 V8.2.7.0
+OBJECT MODULE PLACED IN .\Objects\main.obj
+ASSEMBLER INVOKED BY: C:\Keil_v5\C51\BIN\A51.EXE main.asm SET(SMALL) DEBUG PRINT(.\Listings\main.lst) OBJECT(.\Objects\m
+                      ain.obj) EP
+
+LOC  OBJ            LINE     SOURCE
+
+                       1                     ; PROJE         - Odev2
+                       2                     ; YAZAR         - Burak YAZAN
+                       3                     ; TARIH         - MAYIS 2020
+                       4                     
+0000                   5                     ORG 0H          ; 0H adresine konuslan
+0000 802E              6                     SJMP ANA        ; ANA etiketine dallan
+                       7                     
+000B                   8                     ORG 0BH         ; TIMER0 kesme alanina konuslan
+000B 020120            9     KESME_T:LJMP ISLEM      ; ISLEM etiketine uzun dallanma yap
+                      10                     
+0030                  11                     ORG 30H                         ; 30H adresine konuslan
+0030 D290             12     ANA:    SETB P1.0                       ; P1 i giris olarak ayarla
+0032 758901           13                     MOV TMOD,#01H           ; TMOD 1 olarak ayarla
+0035 75A882           14                     MOV IE,#82H                     ; Kesme yetkilendirme ayarla
+                      15     
+0038 75B000           16     TEMIZLE:MOV P3,#0                       ; P3 e 0 degerini tasi - sifirlama islemi
+003B 7C14             17                     MOV R4,#20                      ; R4 e 20 degerini tasi
+003D 758C3C           18                     MOV TH0,#HIGH(15536); 50000 saymak icin yuksek tarafi ayarla
+0040 758AB0           19                     MOV TL0,#LOW(15536) ; 50000 saymak icin dusuk tarafi ayarla
+                      20     
+0043 E4               21     BASLA:  CLR A                           ; A yi temizle
+0044 90008F           22                     MOV DPTR,#008FH         ; DPTR 8FH adresini tasi
+0047 7F80             23                     MOV R7, #80H            ; R7 e 80H adresini tasi
+0049 8F80             24                     MOV P0,R7                       ; P0 portuna R7deki degeri tasi
+004B C28C             25                     CLR TR0                         ; TR0 i sifirla
+004D 2090E8           26                     JB P1.0, TEMIZLE        ; P1 1 degerindeyse TEMIZLE etiketine dallan
+0050 D28C             27                     SETB TR0                        ; saymayi baslat
+                      28                     
+0052 20B007           29     CALIS:  JB P3.0,SONUK   ; P3.0 1e esitse SONUK etiketine dallan
+0055 FE               30                     MOV R6,A                ; A degerini R6 ya at
+0056 EF               31                     MOV A,R7                ; R7 deki degeri A ya aktar
+0057 23               32                     RL A                    ; A yi sola dondur
+0058 FF               33                     MOV R7,A                ; A nin degerini R7 e at
+0059 EE               34                     MOV A,R6                ; R6 daki degeri tekrar A ya al
+005A 8F80             35                     MOV P0,R7               ; P0 portuna R7 yi tasi
+                      36     
+005C 1173             37     SONUK:  CALL SAY                ; SAY alt programini çagir
+005E F5A0             38                     MOV P2,A                ; A daki degeri P2'ye aktar
+0060 EA               39                     MOV A,R2                ; R2 deki degeri aküye aktar
+0061 1168             40                     CALL GECIKME    ; GECIKME alt programini çagir
+0063 B404EC           41                     CJNE A,#4,CALIS ; A 4 olmadiysa CALIS etiketine dallan
+0066 80DB             42                     SJMP BASLA              ; BASLA etiketine dallan
+                      43     
+0068 780A             44     GECIKME:MOV R0,#10              ; R0 a 10 degerini tasi
+006A 790A             45                     MOV R1,#10              ; R1 e 10 degerini tasi
+006C D8FE             46     BEKLE:  DJNZ R0,BEKLE   ; R0 i 1 azalt 0 degilse BEKLE etiketine dallan
+006E 780A             47                     MOV R0,#10              ; R0 a 10 degerini tasi
+0070 D9FA             48                     DJNZ R1,BEKLE   ; R1 i 1 azalt 0 degilse BEKLE etiketine dallan
+0072 22               49                     RET                     ; alt programdan dön
+                      50     
+0073 04               51     SAY:    INC A                   ; A daki degeri 1 arttir
+0074 FA               52                     MOV R2,A                ; Tablo dizisinin indis degerini R2'ye yükle
+0075 93               53                     MOVC A,@A+DPTR  ; akü ile DPTR'yi topla ilgili adresteki degeri A ya at
+0076 22               54                     RET
+                      55     
+0090                  56                     ORG 90h                                                                    
+                                  ; 90H adresine konuslan
+A51 MACRO ASSEMBLER  MAIN                                                                 05/05/2020 00:18:36 PAGE     2
+
+0090 7C6E067C         57     TABLO:  DB 1111100B, 1101110B, 0000110B, 1111100B       ; B Y 1 B karakterlerinin 7 segment
+                              uzerinde sirali karsiliklari
+                      58     
+0120                  59                     ORG 120H                        ; 120H adresine konuslan
+0120 DC1E             60     ISLEM:  DJNZ R4,DEVAM           ; R4 u bir azalt 0 degilse DEVAM etiketine dallan
+0122 C28D             61                     CLR TF0                         ; Timer flag -TF0- temizle
+0124 B2B0             62                     CPL P3.0                        ; P3.0 i tersle
+0126 7C14             63                     MOV R4,#20                      ; R4 u tekrar 20 olarak ayarla
+0128 758C3C           64                     MOV TH0,#HIGH(15536); 50000 saymak icin yuksek tarafi ayarla
+012B 758AB0           65                     MOV TL0,#LOW(15536)     ; 50000 saymak icin dusuk tarafi ayarla
+012E 32               66                     RETI                            ; kesmeden donus yap
+                      67                     
+0140                  68                     ORG 140H                        ; 140H adresine konuslan
+0140 C28D             69     DEVAM:  CLR TF0                         ; Timer flag -TF0- temizle
+0142 758C3C           70                     MOV TH0,#HIGH(15536); 50000 saymak icin yuksek tarafi ayarla
+0145 758AB0           71                     MOV TL0,#LOW(15536) ; 50000 saymak icin dusuk tarafi ayarla
+0148 32               72                     RETI                            ; kesmeden donus yap
+                      73                     
+                      74                     END                                     ; programi bitir
+A51 MACRO ASSEMBLER  MAIN                                                                 05/05/2020 00:18:36 PAGE     3
+
+SYMBOL TABLE LISTING
+------ ----- -------
+
+
+N A M E             T Y P E  V A L U E   ATTRIBUTES
+
+ANA. . . . . . . .  C ADDR   0030H   A   
+BASLA. . . . . . .  C ADDR   0043H   A   
+BEKLE. . . . . . .  C ADDR   006CH   A   
+CALIS. . . . . . .  C ADDR   0052H   A   
+DEVAM. . . . . . .  C ADDR   0140H   A   
+GECIKME. . . . . .  C ADDR   0068H   A   
+IE . . . . . . . .  D ADDR   00A8H   A   
+ISLEM. . . . . . .  C ADDR   0120H   A   
+KESME_T. . . . . .  C ADDR   000BH   A   
+P0 . . . . . . . .  D ADDR   0080H   A   
+P1 . . . . . . . .  D ADDR   0090H   A   
+P2 . . . . . . . .  D ADDR   00A0H   A   
+P3 . . . . . . . .  D ADDR   00B0H   A   
+SAY. . . . . . . .  C ADDR   0073H   A   
+SONUK. . . . . . .  C ADDR   005CH   A   
+TABLO. . . . . . .  C ADDR   0090H   A   
+TEMIZLE. . . . . .  C ADDR   0038H   A   
+TF0. . . . . . . .  B ADDR   0088H.5 A   
+TH0. . . . . . . .  D ADDR   008CH   A   
+TL0. . . . . . . .  D ADDR   008AH   A   
+TMOD . . . . . . .  D ADDR   0089H   A   
+TR0. . . . . . . .  B ADDR   0088H.4 A   
+
+
+REGISTER BANK(S) USED: 0 
+
+
+ASSEMBLY COMPLETE.  0 WARNING(S), 0 ERROR(S)
